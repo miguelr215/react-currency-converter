@@ -34,7 +34,7 @@ export default function App() {
 				}
 
 				const data = await res.json();
-				console.log(data);
+				// console.log(data);
 				setCountries(data);
 			} catch (error) {
 				console.log(error);
@@ -43,6 +43,38 @@ export default function App() {
 
 		fetchCountries();
 	}, []);
+
+	useEffect(
+		function () {
+			async function getFX() {
+				try {
+					const res = await fetch(
+						`https://api.frankfurter.dev/v1/1999-01-04?base=${inputCountry}&symbols=${outputCountry}`
+					);
+
+					if (!res.ok) {
+						throw new Error(
+							'Something went wrong with fetching exchange rate'
+						);
+					}
+
+					const data = await res.json();
+					console.log('rates:', data);
+
+					const converted = inputQuery * data.rates[outputCountry];
+					console.log('converted:', converted.toFixed(2));
+
+					document.querySelector('.output').innerText =
+						converted.toFixed(2);
+				} catch (error) {
+					console.log(error);
+				}
+			}
+
+			getFX();
+		},
+		[inputCountry, outputCountry, inputQuery]
+	);
 
 	return (
 		<div className="App">
@@ -61,7 +93,7 @@ export default function App() {
 					/>
 				</div>
 				<div className="output-wrapper">
-					<p>OUTPUT</p>
+					<p className="output">OUTPUT</p>
 					<CountrySelection
 						countries={countries}
 						country={outputCountry}
@@ -93,16 +125,11 @@ function CountrySelection({ countries, country, setInput }) {
 			value={country}
 			onChange={(e) => setInput(e.target.value)}
 		>
-			{countriesList.map((country) => {
-				return (
-					<option
-						value={country}
-						key={countriesList.indexOf(country)}
-					>
-						{country}
-					</option>
-				);
-			})}
+			{countriesList.map((country) => (
+				<option value={country} key={countriesList.indexOf(country)}>
+					{country}
+				</option>
+			))}
 		</select>
 	);
 }
